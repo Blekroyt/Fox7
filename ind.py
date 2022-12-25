@@ -1,25 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import argparse
 import json
-import os.path
 import sys
+import click
 from datetime import date
 
 
-def add_worker(staff, name, tel, year):
+@click.command()
+def main():
+    print("I'm a beautiful CLI ✨")
+def get_worker():
     """
-    Добавить данные о работнике.
+    Запросить данные о работнике.
     """
-    staff.append(
-        {
-            "name": name,
-            "tel": post,
-            "year": year
-        }
-    )
-    return staff
-
+    name = input("Фамилия, Имя? ")
+    tel = input("Номер? ")
+    year = int(input("Дата рождения? "))
+    # Создать словарь.
+    return {
+    'name': name,
+    'tel': tel,
+    'year': year,
+    }
 
 def display_workers(staff):
     """
@@ -27,56 +29,50 @@ def display_workers(staff):
     """
     # Проверить, что список работников не пуст.
     if staff:
-        # Заголовок таблицы.
+    # Заголовок таблицы.
         line = '+-{}-+-{}-+-{}-+-{}-+'.format(
-            '-' * 4,
-            '-' * 30,
-            '-' * 20,
-            '-' * 8
-        )
-        print(line)
+        '-' * 4,
+        '-' * 30,
+        '-' * 20,
+        '-' * 8
+    )
+    print(line)
+    print(
+    '| {:^4} | {:^30} | {:^20} | {:^8} |'.format(
+    "No",
+    "Ф.И.О.",
+    "Телефон",
+    "Год"
+    )
+    )
+    print(line)
+    # Вывести данные о всех сотрудниках.
+    for idx, worker in enumerate(staff, 1):
         print(
-            '| {:^4} | {:^30} | {:^20} | {:^8} |'.format(
-                "No",
-                "Ф.И.О.",
-                "Телефон",
-                "Год"
+            '| {:>4} | {:<30} | {:<20} | {:>8} |'.format(
+            idx,
+            worker.get('name', ''),
+            worker.get('tel', ''),
+            worker.get('year', 0)
             )
-        )
-        print(line)
-
-        # Вывести данные о всех сотрудниках.
-        for idx, worker in enumerate(staff, 1):
-            print(
-                '| {:>4} | {:<30} | {:<20} | {:>8} |'.format(
-                    idx,
-                    worker.get('name', ''),
-                    worker.get('post', ''),
-                    worker.get('year', 0)
-                )
             )
         print(line)
     else:
         print("Список работников пуст.")
 
-
 def select_workers(staff, period):
     """
-    Выбрать работников с заданным номером.
+    Выбрать работников с заданным телефоном.
     """
-
     # Получить текущую дату.
     today = date.today()
-
     # Сформировать список работников.
     result = []
     for employee in staff:
         if today.year - employee.get('year', today.year) >= period:
             result.append(employee)
-
-        # Возвратить список выбранных работников.
-        return result
-
+    # Возвратить список выбранных работников.
+    return result
 
 def save_workers(file_name, staff):
     """
@@ -88,7 +84,6 @@ def save_workers(file_name, staff):
         # Для поддержки кирилицы установим ensure_ascii=False
         json.dump(staff, fout, ensure_ascii=False, indent=4)
 
-
 def load_workers(file_name):
     """
     Загрузить всех работников из файла JSON.
@@ -97,105 +92,65 @@ def load_workers(file_name):
     with open(file_name, "r", encoding="utf-8") as fin:
         return json.load(fin)
 
-
-def main(command_line=None):
-    # Создать родительский парсер для определения имени файла.
-    file_parser = argparse.ArgumentParser(add_help=False)
-    file_parser.add_argument(
-        "filename",
-        action="store",
-        help="The data file name"
-    )
-
-    # Создать основной парсер командной строки.
-    parser = argparse.ArgumentParser("workers")
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="%(prog)s 0.1.0"
-    )
-    subparsers = parser.add_subparsers(dest="command")
-
-    # Создать субпарсер для добавления работника.
-    add = subparsers.add_parser(
-        "add",
-        parents=[file_parser],
-        help="Add a new worker"
-    )
-    add.add_argument(
-        "-n",
-        "--name",
-        action="store",
-        required=True,
-        help="The worker's name"
-    )
-    add.add_argument(
-        "-p",
-        "--post",
-        action="store",
-        help="The worker's post"
-    )
-    add.add_argument(
-        "-y",
-        "--year",
-        action="store",
-        type=int,
-        required=True,
-        help="The year of hiring"
-    )
-    # Создать субпарсер для отображения всех работников.
-    _ = subparsers.add_parser(
-        "display",
-        parents=[file_parser],
-        help="Display all workers"
-    )
-    # Создать субпарсер для выбора работников.
-    select = subparsers.add_parser(
-        "select",
-        parents=[file_parser],
-        help="Select the workers"
-    )
-    select.add_argument(
-        "-P",
-        "--period",
-        action="store",
-        type=int,
-        required=True,
-        help="The required period"
-    )
-    # Выполнить разбор аргументов командной строки.
-    args = parser.parse_args(command_line)
-
-    # Загрузить всех работников из файла, если файл существует.
-    is_dirty = False
-    if os.path.exists(args.filename):
-        workers = load_workers(args.filename)
+def main():
+    """
+    Главная функция программы.
+    """
+    # Список работников.
+    workers = []
+    # Организовать бесконечный цикл запроса команд.
+    while True:
+        # Запросить команду из терминала.
+        command = input(">>> ").lower()
+        # Выполнить действие в соответствие с командой.
+        if command == "exit":
+            break
+        elif command == "add":
+            # Запросить данные о работнике.
+            worker = get_worker()
+            # Добавить словарь в список.
+            workers.append(worker)
+            # Отсортировать список в случае необходимости.
+            if len(workers) > 1:
+                workers.sort(key=lambda item: item.get('name', ''))
+        elif command == "list":
+            # Отобразить всех работников.
+            display_workers(workers)
+        elif command.startswith("select "):
+            # Разбить команду на части для выделения стажа.
+            parts = command.split(maxsplit=1)
+            # Получить требуемый стаж.
+            period = int(parts[1])
+            # Выбрать работников с заданным стажем.
+            selected = select_workers(workers, period)
+            # Отобразить выбранных работников.
+            display_workers(selected)
+        elif command.startswith("save "):
+            # Разбить команду на части для выделения имени файла.
+            parts = command.split(maxsplit=1)
+            # Получить имя файла.
+            file_name = parts[1]
+            # Сохранить данные в файл с заданным именем.
+            save_workers(file_name, workers)
+        elif command.startswith("load "):
+            # Разбить команду на части для выделения имени файла.
+            parts = command.split(maxsplit=1)
+            # Получить имя файла.
+            file_name = parts[1]
+            # Сохранить данные в файл с заданным именем.
+            workers = load_workers(file_name)
+        elif command == 'help':
+            # Вывести справку о работе с программой.
+            print("Список команд:\n")
+            print("add - добавить работника;")
+            print("list - вывести список работников;")
+            print("select <стаж> - запросить работников со стажем;")
+            print("help - отобразить справку;")
+            print("load - загрузить данные из файла;")
+            print("save - сохранить данные в файл;")
+            print("exit - завершить работу с программой.")
     else:
-        workers = []
-
-    # Добавить работника.
-    if args.command == "add":
-        workers = add_worker(
-            workers,
-            args.name,
-            args.post,
-            args.year
-        )
-        is_dirty = True
-
-    # Отобразить всех работников.
-    elif args.command == "display":
-        display_workers(workers)
-
-    # Выбрать требуемых работников.
-    elif args.command == "select":
-        selected = select_workers(workers, args.period)
-        display_workers(selected)
-
-    # Сохранить данные в файл, если список работников был изменен.
-    if is_dirty:
-        save_workers(args.filename, workers)
-
+        print(f"Неизвестная команда {command}", file=sys.stderr)
 
 if __name__ == '__main__':
     main()
