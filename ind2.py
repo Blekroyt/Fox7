@@ -7,7 +7,7 @@ import sys
 from datetime import date
 
 
-def add_worker(staff, name, post, year):
+def add_worker(staff, name, tel, year):
     """
     Добавить данные о работнике.
     """
