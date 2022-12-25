@@ -14,7 +14,7 @@ def add_worker(staff, name, post, year):
     staff.append(
         {
             "name": name,
-            "post": post,
+            "tel": post,
             "year": year
         }
     )
@@ -39,7 +39,7 @@ def display_workers(staff):
             '| {:^4} | {:^30} | {:^20} | {:^8} |'.format(
                 "No",
                 "Ф.И.О.",
-                "Должность",
+                "Телефон",
                 "Год"
             )
         )
@@ -62,7 +62,7 @@ def display_workers(staff):
 
 def select_workers(staff, period):
     """
-    Выбрать работников с заданным стажем.
+    Выбрать работников с заданным номером.
     """
 
     # Получить текущую дату.
@@ -187,7 +187,7 @@ def main(command_line=None):
     elif args.command == "display":
         display_workers(workers)
 
-    # Выбрать требуемых рааботников.
+    # Выбрать требуемых работников.
     elif args.command == "select":
         selected = select_workers(workers, args.period)
         display_workers(selected)
